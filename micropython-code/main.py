@@ -36,9 +36,10 @@ while True:
         else:
             door_status = "Door Fine"
 
-        # Send average data and door status as a JSON string
-        sendData(temp, humidity, door_status)
-        print(temp, humidity, door_status)
+        # Send data and door status as a JSON string
+        sendData(temp, humidity, avgTemp, avgHumidity, door_status)
+
     except OSError as e:
         print('Failed to read sensor.')
+
 
