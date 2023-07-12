@@ -22,21 +22,19 @@ def connect():
     print(f'Connected on {ip}')
     return ip
 
-def sendData(message):
+def sendData(message,msg2):
     try:    
         addr = socket.getaddrinfo('192.168.0.164', 1880)[0][-1]
         s.sendto(message, addr)
+        s.sendto(msg2, addr)
         print('Message sent.')
     except:
         print('Message not sent. Error: {str(e)}')
-
-
-
-
 
 try:
     ip = connect()
 except KeyboardInterrupt:
     machine.reset()
+
 
 

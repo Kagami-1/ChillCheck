@@ -1,23 +1,44 @@
 import machine
 import dht
-from web_server import connect
-from web_server import sendData
-
+import ujson
+from time import sleep
+from web_server import connect, sendData
 
 sensor = dht.DHT11(machine.Pin(28))
+temperatures = []
+humidities = []
 
+# Connect to WLAN
+connect()
 
-if __name__=="__main__":
-    print(connect())
-    connect()
-    
 while True:
     try:
         sensor.measure()
+        sleep(0.5)
         temp = sensor.temperature()
         humidity = sensor.humidity()
-        sendData(str(temp))
-        print('Temperature: %3.2f C' %temp)
-        print('Humidity: %3.2f %%' %humidity)
+
+        # Store up to the last 100 sensor readings
+        if len(temperatures) >= 100:
+            temperatures.pop(0)  # remove oldest temperature
+        if len(humidities) >= 100:
+            humidities.pop(0)  # remove oldest humidity
+
+        temperatures.append(temp)
+        humidities.append(humidity)
+        
+        avgTemp = sum(temperatures) / len(temperatures)
+        avgHumidity = sum(humidities) / len(humidities)
+
+        # Check if the temperature has changed by 5 degrees or more
+        if abs(avgTemp - temp) >= 5:
+            door_status = "Door Open!"
+        else:
+            door_status = "Door Fine"
+
+        # Send average data and door status as a JSON string
+        sendData(temp, humidity, door_status)
+        print(temp, humidity, door_status)
     except OSError as e:
         print('Failed to read sensor.')
+
